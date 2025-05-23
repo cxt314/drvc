@@ -1,0 +1,39 @@
+# replace mysite with name of app
+databases:
+  - name: mysitedb
+    plan: free
+    databaseName: mysite
+    user: mysite
+
+services:
+  # # A Key Value instance 
+  # - type: keyvalue
+  #   name: private cache
+  #   ipAllowList: [] # Only allow internal connections
+  #   plan: free # Default: starter
+  #   maxmemoryPolicy: allkeys-lru # Default: allkeys-lru)
+
+  - type: web
+    plan: free
+    name: mysite
+    runtime: python
+    buildCommand: './build.sh'
+    startCommand: 'python -m gunicorn ___.asgi:application -k uvicorn.workers.UvicornWorker' 
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mysitedb
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true # Generate a base64-encoded 256-bit value
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: DJANGO_SETTINGS_MODULE
+        value: ___.settings.production
+      # # comment out cache location if not using redis
+      # - key: CACHELOCATION
+      #   fromService:
+      #     name: private cache
+      #     type: keyvalue
+      #     property: connectionString
+
