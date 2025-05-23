@@ -1,0 +1,18 @@
+{% extends '_base.html' %}
+
+{% block title %} DRVC: Vehicles {% endblock title %}
+
+{% block content %}
+<h1>Vehicles</h1>
+        <ul>
+            {% for vehicle in object_list %}
+                <li>
+                    {{ vehicle.name }} <br />
+                    <time>purchased: ${{vehicle.purchase_price}}</time>
+                </li>
+            {% empty %}
+                <li>No vehicles yet.</li>
+            {% endfor %}
+        </ul>
+
+{% endblock content%}

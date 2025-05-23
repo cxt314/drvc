@@ -56,6 +56,7 @@ INSTALLED_APPS += [
 INSTALLED_APPS += [
     "accounts",
     "pages",
+    "vehicles",
 ]
 
 MIDDLEWARE = [
