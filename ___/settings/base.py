@@ -58,6 +58,7 @@ INSTALLED_APPS += [
     "pages",
     "vehicles",
     "members",
+    "mileage_logs",
 ]
 
 MIDDLEWARE = [
