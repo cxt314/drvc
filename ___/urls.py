@@ -25,6 +25,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("", include("pages.urls")),
     path("vehicles/", include("vehicles.urls")),
+    path("members/", include("members.urls"))
 ]
 if settings.DEBUG:
     import debug_toolbar
