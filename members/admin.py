@@ -7,7 +7,7 @@ class MemberAliasInline(admin.StackedInline):
     extra = 1
 
 class MemberAdmin(admin.ModelAdmin):
-    fields = ["email"]
+    fields = ["name", "email"]
     inlines = [MemberAliasInline]
 
 admin.site.register(Member, MemberAdmin)
