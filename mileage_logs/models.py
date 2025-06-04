@@ -39,4 +39,4 @@ class MileageLogEntry(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.mileage_log} {self.ride_date} {self.member}"
+        return f"{self.mileage_log} {self.ride_date} {self.member.name}"
