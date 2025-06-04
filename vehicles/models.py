@@ -10,12 +10,12 @@ class Vehicle(models.Model):
     GASOLINE = "GS"
     DIESEL = "DS"
     ELECTRIC = "EC"
-    FUEL_TYPE_CHOICES = {
-        HYBRID: "Hybrid",
-        ELECTRIC: "Electric",
-        DIESEL: "Diesel",
-        GASOLINE: "Gasoline",
-    }
+    FUEL_TYPE = (
+        (HYBRID, "Hybrid"),
+        (ELECTRIC, "Electric"),
+        (DIESEL, "Diesel"),
+        (GASOLINE, "Gasoline"),
+    )
 
     name = models.CharField(max_length=200)
     year = models.PositiveIntegerField(
@@ -25,7 +25,7 @@ class Vehicle(models.Model):
     model = models.CharField(max_length=50)
     fuel_type = models.CharField(
         max_length=2, 
-        choices=FUEL_TYPE_CHOICES, 
+        choices=FUEL_TYPE, 
         default=HYBRID,
     )
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
