@@ -13,8 +13,8 @@ class Member(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "member"
-        verbose_name_plural = "members"
+        verbose_name = "Member"
+        verbose_name_plural = "Members"
 
     def __str__(self):
         return self.name
@@ -27,13 +27,13 @@ class MemberAlias(models.Model):
     member = models.ForeignKey(
         Member, 
         on_delete=models.CASCADE,
-        related_name="aliases",
-        related_query_name="alias",
+        related_name="Aliases",
+        related_query_name="Alias",
     )
 
     class Meta:
-        verbose_name = "member alias"
-        verbose_name_plural = "member aliases"
+        verbose_name = "Member alias"
+        verbose_name_plural = "Member aliases"
         
     def __str__(self):
         return self.name

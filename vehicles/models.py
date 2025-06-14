@@ -28,11 +28,18 @@ class Vehicle(models.Model):
         choices=FUEL_TYPE, 
         default=HYBRID,
     )
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
     purchase_date = models.DateField(default=date.today, blank=True)
-    vin = models.CharField(max_length=20, blank=True)
+    license_plate = models.CharField(max_length=20, blank=True, help_text="Unique license plate number")
+    vin = models.CharField(max_length=17, blank=True, null=True, unique=True, help_text="Vehicle Identification Number (optional)")
+    current_mileage = models.DecimalField(max_digits=10, decimal_places=1, default=0.0, help_text="Current odometer reading")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = "Vehicle"
+        verbose_name_plural = "Vehicles"
+        ordering = ['name']
