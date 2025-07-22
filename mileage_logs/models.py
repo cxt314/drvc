@@ -93,23 +93,24 @@ class MileageLogEntry(models.Model):
     """
     Represents a single mileage log entry within a MonthlyMileageLog.
     """
-    # Django will automatically create an 'id' AutoField as the primary key.
     monthly_log = models.ForeignKey(
         MonthlyMileageLog, on_delete=models.CASCADE, related_name='log_entries',
-        help_text="The monthly log this entry belongs to"
+        help_text="The monthly log this trip belongs to"
     )
-    entry_date = models.DateField(help_text="Date of the mileage entry (should be within the monthly log's month/year)")
-    start_mileage = models.DecimalField(max_digits=10, decimal_places=1, help_text="Odometer reading at the start of the trip")
-    end_mileage = models.DecimalField(max_digits=10, decimal_places=1, help_text="Odometer reading at the end of the trip")
-    distance_traveled = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True, editable=False, help_text="Calculated distance (end_mileage - start_mileage)")
+    entry_date = models.DateField(help_text="Date of the trip (should be within the monthly log's month/year)")
+    start_mileage = models.DecimalField(max_digits=10, decimal_places=0, help_text="Odometer reading at the start of the trip")
+    end_mileage = models.DecimalField(max_digits=10, decimal_places=0, help_text="Odometer reading at the end of the trip")
+    distance_traveled = models.DecimalField(max_digits=10, decimal_places=0, blank=True, null=True, editable=False, help_text="Calculated distance (end_mileage - start_mileage)")
     destination = models.TextField(blank=True, help_text="Optional destination of the trip")
     purpose = models.TextField(blank=True, help_text="Optional purpose of the trip")
     is_long_distance = models.BooleanField(default=False)
-    # Many-to-Many relationship with Member
+    # Define the Many-to-Many relationship with a 'through' model
+    # The 'through' model (MileageClaim) will contain the 'number_of_seats_claimed' field.
     members = models.ManyToManyField(
         Member,
-        related_name='mileage_entries',
-        help_text="Select members associated with this trip. At least one member is required."
+        through='MileageClaim', # Specify the intermediate model
+        related_name='claimed_mileage_entries', # New related_name
+        help_text="Members associated with this trip and their seat claims."
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -208,3 +209,50 @@ class MileageLogEntry(models.Model):
     def __str__(self):
         return f"{self.monthly_log.vehicle.name} - Trip on {self.entry_date}: {self.distance_traveled or 0} miles"
 
+    def get_total_claimed_seats(self):
+        """Calculates the sum of all seats claimed for this entry."""
+        return self.mileageclaim_set.aggregate(total_seats=models.Sum('number_of_seats_claimed'))['total_seats'] or 0
+
+    def get_members_with_seats(self):
+        """Returns a string representation of members and their claimed seats."""
+        claims = self.mileageclaim_set.all().select_related('member').order_by('member__name')
+        return ", ".join([f"{claim.member.name} ({claim.number_of_seats_claimed} seats)" for claim in claims])
+    get_members_with_seats.short_description = "Members & Seats"
+
+# --- Intermediate Model for Many-to-Many Relationship ---
+class MileageClaim(models.Model):
+    """
+    Represents a the number of seats a specific member claimed per MileageLogEntry.
+    This is the 'through' model for the Many-to-Many relationship.
+    """
+    mileage_log_entry = models.ForeignKey(
+        MileageLogEntry, on_delete=models.CASCADE,
+        help_text="The mileage log entry this claim is for"
+    )
+    member = models.ForeignKey(
+        Member, on_delete=models.CASCADE,
+        help_text="The member making the claim"
+    )
+    number_of_seats_claimed = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)],
+        help_text="Number of seats claimed by this member for this trip."
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        # Ensures that a member can only make one claim (for seats) per mileage entry.
+        unique_together = ('mileage_log_entry', 'member')
+        verbose_name = "Mileage Claim"
+        verbose_name_plural = "Mileage Claims"
+        ordering = ['mileage_log_entry', 'member__name']
+
+    def __str__(self):
+        return f"{self.member.name} claimed {self.number_of_seats_claimed} seats on {self.mileage_log_entry.entry_date}"
+
+    def clean(self):
+        super().clean()
+        # You could add validation here, e.g., to ensure total seats claimed don't exceed vehicle capacity
+        # This would require accessing self.mileage_log_entry.monthly_log.vehicle.seat_capacity (if you add such a field)
+        # However, checking *total* seats is often better done in the MileageLogEntry's clean method or form's clean method,
+        # after all claims have been potentially modified.
