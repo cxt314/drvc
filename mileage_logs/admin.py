@@ -2,6 +2,10 @@ from django.contrib import admin
 from django.db import models
 from django.forms import Textarea, TextInput
 
+
+# Import Nested classes from django-nested-admin
+import nested_admin
+
 # Import all models from the mileage_logs app
 from .models import MonthlyMileageLog, MileageLogEntry, MileageClaim
 # If you need to import Member, it's already used in MileageClaim, so it's implicitly there.
@@ -10,11 +14,11 @@ from .models import MonthlyMileageLog, MileageLogEntry, MileageClaim
 # --- Inlines ---
 
 # Inline for MileageClaim within MileageLogEntry
-class MileageClaimInline(admin.TabularInline):
+class MileageClaimInline(nested_admin.NestedTabularInline):
     model = MileageClaim
-    extra = 1
+    extra = 5
     fields = ('member', 'number_of_seats_claimed')
-    #raw_id_fields = ('member',) # Use raw_id_fields if you have many members
+    raw_id_fields = ('member',) # Use raw_id_fields if you have many members
     verbose_name = "Member Seat Claim" # Custom verbose name for the inline header
     verbose_name_plural = "Member Seat Claims"
     formfield_overrides = {
@@ -22,7 +26,7 @@ class MileageClaimInline(admin.TabularInline):
     }
 
 # Inline for MileageLogEntry within MonthlyMileageLog
-class MileageLogEntryInline(admin.TabularInline): # StackedInline gives more space, better for nested inlines
+class MileageLogEntryInline(nested_admin.NestedTabularInline): # StackedInline gives more space, better for nested inlines
     model = MileageLogEntry
     extra = 1
     fields = ('entry_date',
@@ -50,7 +54,7 @@ class MileageLogEntryInline(admin.TabularInline): # StackedInline gives more spa
 # --- ModelAdmin for each model ---
 
 @admin.register(MonthlyMileageLog)
-class MonthlyMileageLogAdmin(admin.ModelAdmin):
+class MonthlyMileageLogAdmin(nested_admin.NestedModelAdmin):
     list_display = (
         'vehicle', 'year', 'month', 'start_odometer_reading',
         'end_odometer_reading', 'total_distance_logged', 'updated_at'

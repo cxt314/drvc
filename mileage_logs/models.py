@@ -235,6 +235,7 @@ class MileageClaim(models.Model):
     )
     number_of_seats_claimed = models.PositiveIntegerField(
         validators=[MinValueValidator(1)],
+        default=1,
         help_text="Number of seats claimed by this member for this trip."
     )
     created_at = models.DateTimeField(auto_now_add=True)

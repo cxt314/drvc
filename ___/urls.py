@@ -26,6 +26,7 @@ admin.site.index_title = "DRVC administration"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('_nested_admin/', include('nested_admin.urls')),
     path("accounts/", include("allauth.urls")),
     path("", include("pages.urls")),
     path("vehicles/", include("vehicles.urls")),
