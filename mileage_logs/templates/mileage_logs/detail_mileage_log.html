@@ -29,33 +29,48 @@
             </div>
         </div>
 
-        <h3>Trip Entries</h3>
-        {% for entry in monthly_log.log_entries.all %}
-            <div class="card mb-3">
-                <div class="card-header">
-                    Trip on {{ entry.entry_date }}
-                </div>
-                <div class="card-body">
-                    <p><strong>Start Mileage:</strong> {{ entry.start_mileage }}</p>
-                    <p><strong>End Mileage:</strong> {{ entry.end_mileage }}</p>
-                    <p><strong>Distance Traveled:</strong> {{ entry.distance_traveled }}</p>
-                    <p><strong>Destination:</strong> {{ entry.destination|default:"" }}</p>
-                    
-                    {% if entry.mileage_claims.all %}
-                        <h6 class="mt-4">Member Claims for this trip:</h6>
-                        <ul class="list-group list-group-flush">
-                            {% for claim in entry.mileage_claims.all %}
-                                <li class="list-group-item">
-                                    {{ claim.member }} claimed {{ claim.number_of_seats_claimed }} seat(s).
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-            </div>
-        {% empty %}
-            <p>No trip entries found for this log.</p>
-        {% endfor %}
+<h3>Trip Entries</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Start Mileage</th>
+                        <th>End Mileage</th>
+                        <th>Distance Traveled</th>
+                        <th>Destination</th>
+                        <th>Riders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in monthly_log.log_entries.all %}
+                    <tr>
+                        <td>{{ entry.entry_date }}</td>
+                        <td>{{ entry.start_mileage }}</td>
+                        <td>{{ entry.end_mileage }}</td>
+                        <td>{{ entry.distance_traveled }}</td>
+                        <td>{{ entry.destination|default:"-" }}</td>
+                        <td>
+                            {% if entry.mileageclaim_set.all %}
+                                {% for claim in entry.mileageclaim_set.all %}
+                                    {% for i in "x"|ljust:claim.number_of_seats_claimed %}
+                                        <span>{{ claim.member.get_full_name|default:claim.member }}</span>{% if not forloop.last %},{% endif %}
+                                    {% endfor %}
+                                    {% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No trip entries found for this log.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         <div class="mt-5">
             <a href="{% url 'list_mileage_logs' %}" class="btn btn-secondary">Back to List</a>
