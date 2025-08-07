@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
-from django.views.generic import ListView # Import ListView
+from django.views.generic import ListView, DetailView
 
 from .models import MonthlyMileageLog
 from .forms import MileageLogEntryFormSet, MileageClaimFormSet, MonthlyMileageLogForm
@@ -14,6 +14,14 @@ class MileageLogListView(ListView):
     template_name = 'mileage_logs/list_mileage_logs.html'
     context_object_name = 'monthly_logs'
     queryset = MonthlyMileageLog.objects.all().order_by('-year', '-month')
+
+class MileageLogDetailView(DetailView):
+    """
+    Generic view to display a single MonthlyMileageLog entry.
+    """
+    model = MonthlyMileageLog
+    template_name = 'mileage_logs/detail_mileage_log.html'
+    context_object_name = 'monthly_log'
 
 def create_mileage_log_view(request):
     """
