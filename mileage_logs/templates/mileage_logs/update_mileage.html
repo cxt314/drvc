@@ -1,0 +1,138 @@
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Mileage Log</title>
+    <!-- Include Bootstrap 5 CSS for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- You will also need your own CSS for custom styling -->
+    <style>
+        .hidden-form {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <h1>Update Mileage Log for {{ monthly_log.month }} {{ monthly_log.year }}</h1>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- This is the management form for the formset, crucial for Django -->
+            <!-- The Javascript looks for the input with the name ending in '-TOTAL_FORMS' inside this. -->
+            {{ formset.management_form }}
+
+            <div id="trip-entries-container">
+                {% for form in formset %}
+                    <div class="card mb-3 trip-entry-formset">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Trip Entry #{{ forloop.counter }}</h5>
+                            {% if form.instance.pk %}
+                                <button type="submit" name="delete_entry-{{ form.instance.pk }}" class="btn btn-danger btn-sm">Delete</button>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <!-- Crispy Forms will render the form with the layout defined in forms.py -->
+                            {% crispy form %}
+                            
+                            {% if form.instance.pk %}
+                                <!-- Nested formset for claims -->
+                                <h6 class="mt-4">Member Claims</h6>
+                                {% with claim_formset=form.instance.get_claim_formset %}
+                                    {{ claim_formset.management_form }}
+                                    {% for claim_form in claim_formset %}
+                                        <div class="claim-formset border p-3 mb-2 rounded">
+                                            {% crispy claim_form %}
+                                        </div>
+                                    {% endfor %}
+                                    <!-- A button to add more nested forms -->
+                                    <button type="button" class="btn btn-outline-secondary btn-sm add-claim">Add another claim</button>
+                                {% endwith %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- This is the hidden empty form template that the JavaScript will clone -->
+            <div class="hidden-form empty-form">
+                <div class="card mb-3 trip-entry-formset">
+                    <div class="card-body">
+                        {% crispy formset.empty_form %}
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-another-trip" class="btn btn-primary mt-3">Add another trip</button>
+            <button type="submit" class="btn btn-success mt-3">Save Log</button>
+        </form>
+
+    </div>
+
+    <!-- The Javascript is what handles the dynamic adding of forms and mileage auto-fill -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('trip-entries-container');
+            const addButton = document.getElementById('add-another-trip');
+            const totalFormsInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
+            
+            // Critical check to prevent the TypeError
+            if (!totalFormsInput) {
+                console.error("The TOTAL_FORMS input could not be found. Formset logic will not work.");
+                return;
+            }
+
+            let formCount = parseInt(totalFormsInput.value);
+            
+            // This function is the key part for dynamic auto-population
+            function autoFillStartMileage(newForm) {
+                const prevForm = newForm.previousElementSibling;
+                if (prevForm) {
+                    const prevEndMileageInput = prevForm.querySelector('input[name$="-end_mileage"]');
+                    if (prevEndMileageInput) {
+                        const newStartMileageInput = newForm.querySelector('input[name$="-start_mileage"]');
+                        if (newStartMileageInput) {
+                            newStartMileageInput.value = prevEndMileageInput.value;
+                        }
+                    }
+                }
+            }
+
+            addButton.addEventListener('click', () => {
+                const emptyFormTemplate = document.querySelector('.empty-form .trip-entry-formset').cloneNode(true);
+
+                // Update the form's fields to use the correct index
+                const newFormHtml = emptyFormTemplate.innerHTML.replace(/__prefix__/g, formCount);
+                emptyFormTemplate.innerHTML = newFormHtml;
+
+                // Append the new form to the container
+                container.appendChild(emptyFormTemplate);
+                
+                // Auto-fill the start mileage before incrementing the count
+                autoFillStartMileage(emptyFormTemplate);
+
+                // Increment total forms and update the hidden input
+                formCount++;
+                totalFormsInput.value = formCount;
+            });
+
+            // Optional: Also pre-fill the start_mileage of the initial empty form
+            // when the page loads, if there are already existing entries.
+            const existingForms = container.querySelectorAll('.trip-entry-formset');
+            if (existingForms.length > 1) {
+                const lastExistingForm = existingForms[existingForms.length - 2];
+                const emptyForm = existingForms[existingForms.length - 1];
+                const prevEndMileage = lastExistingForm.querySelector('input[name$="-end_mileage"]').value;
+                if (prevEndMileage && emptyForm.querySelector('input[name$="-start_mileage"]')) {
+                    emptyForm.querySelector('input[name$="-start_mileage"]').value = prevEndMileage;
+                }
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdi/RSuC4qR6bBwB9Zk6K6Fm5l" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -30,7 +30,8 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("", include("pages.urls")),
     path("vehicles/", include("vehicles.urls")),
-    path("members/", include("members.urls"))
+    path("members/", include("members.urls")),
+    path("mileage_logs/", include("mileage_logs.urls")),
 ]
 if settings.DEBUG:
     import debug_toolbar
