@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     # MileageLog list view
-    path('', views.MileageLogListView.as_view(), name='list_mileage_logs'),
+    path('', views.MileageLogListView.as_view(), name='mileage_logs_list'),
     # MileageLog detail view
     path('<int:pk>/', views.MileageLogDetailView.as_view(), name='detail_mileage_log'),
     # URL to create a new mileage log

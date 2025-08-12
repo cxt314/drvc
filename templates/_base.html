@@ -39,6 +39,9 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'vehicle_list' %}">Vehicles</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'mileage_logs_list' %}">Mileage Logs</a>
+          </li>
         </ul>
         {% if user.is_authenticated %}
         <div class="mr-auto">

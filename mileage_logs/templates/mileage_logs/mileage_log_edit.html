@@ -1,0 +1,20 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %} DRVC: Add New Mileage Log {% endblock title %}
+
+{% block content %}
+<h1>Add New Mileage Log</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <!-- Main form for the MonthlyMileageLog -->
+    {% crispy monthly_log_form %}
+
+    <hr class="mt-4 mb-4">
+
+    <button type="submit" class="btn btn-success mt-3">Save Log</button>
+</form>
+
+{% endblock content%}
