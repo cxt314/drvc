@@ -11,7 +11,7 @@ class MileageLogListView(ListView):
     Generic view to list all MonthlyMileageLog entries.
     """
     model = MonthlyMileageLog
-    template_name = 'mileage_logs/list_mileage_logs.html'
+    template_name = 'mileage_logs/mileage_logs_list.html'
     context_object_name = 'monthly_logs'
     queryset = MonthlyMileageLog.objects.all().order_by('-year', '-month')
 
@@ -34,7 +34,7 @@ def create_mileage_log_view(request):
             monthly_log = form.save(commit=False)
             monthly_log.save()
 
-            return redirect('list_mileage_logs')  # Redirect to the list view after creation
+            return redirect('mileage_logs_list')  # Redirect to the list view after creation
 
     context = {
         'monthly_log_form': form,
@@ -43,7 +43,7 @@ def create_mileage_log_view(request):
 
 def update_mileage_log_view(request, pk):
     """
-    View to update a MonthlyMileageLog and its nested inlines.
+    View to update a MonthlyMileageLog
     """
     monthly_log = get_object_or_404(MonthlyMileageLog, pk=pk)
 
@@ -64,6 +64,14 @@ def update_mileage_log_view(request, pk):
     
     return render(request, 'mileage_logs/mileage_log_edit.html', context)
 
+def delete_mileage_log_view(request, pk):
+    """
+    View to delete a MonthlyMileageLog
+    """
+    monthly_log = get_object_or_404(MonthlyMileageLog, pk=pk)
+    monthly_log.delete()
+    return redirect('mileage_logs_list')
+
 # def create_mileage_log_view(request):
 #     """
 #     View to create a new MonthlyMileageLog and its nested inlines.
@@ -82,7 +90,7 @@ def update_mileage_log_view(request, pk):
 #                 instance.save()
 #             formset.save_m2m()
 
-#             return redirect('list_mileage_logs')  # Redirect to the list view after creation
+#             return redirect('mileage_logs_list')  # Redirect to the list view after creation
 
 #     context = {
 #         'monthly_log_form': monthly_log_form,
