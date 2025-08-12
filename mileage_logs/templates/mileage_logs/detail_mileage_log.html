@@ -4,72 +4,76 @@
 
 {% block content %}
 
-    <div class="container mt-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>{{ monthly_log.vehicle }} - {{ monthly_log.month }} {{ monthly_log.year }}</h1>
-            <a href="{% url 'update_mileage_log' pk=monthly_log.pk %}" class="btn btn-warning">Edit Log Details</a>
-        </div>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ monthly_log.vehicle }} - {{ monthly_log.month }} {{ monthly_log.year }}</h1>
+        <a href="{% url 'update_mileage_log' pk=monthly_log.pk %}" class="btn btn-warning">Edit Log Details</a>
+    </div>
 
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3>Log Summary</h3>
-            </div>
-            <div class="card-body">
-                <p><strong>Vehicle:</strong> {{ monthly_log.vehicle }}</p>
-                <p><strong>Year/Month:</strong> {{ monthly_log.year }}/{{ monthly_log.month }}</p>
-                <p><strong>Start Odometer:</strong> {{ monthly_log.start_odometer_reading }}</p>
-                <p><strong>End Odometer:</strong> {{ monthly_log.end_odometer_reading }}</p>
-                <p><strong>Total Distance Logged:</strong> {{ monthly_log.total_distance_logged }}</p>
-                <p><strong>Last Updated:</strong> {{ monthly_log.updated_at }}</p>
-            </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Log Summary</h3>
         </div>
-
-<h3>Trip Entries</h3>
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Start Mileage</th>
-                        <th>End Mileage</th>
-                        <th>Distance Traveled</th>
-                        <th>Destination</th>
-                        <th>Riders</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in monthly_log.log_entries.all %}
-                    <tr>
-                        <td>{{ entry.entry_date }}</td>
-                        <td>{{ entry.start_mileage }}</td>
-                        <td>{{ entry.end_mileage }}</td>
-                        <td>{{ entry.distance_traveled }}</td>
-                        <td>{{ entry.destination|default:"-" }}</td>
-                        <td>
-                            {% if entry.mileageclaim_set.all %}
-                                {% for claim in entry.mileageclaim_set.all %}
-                                    {% for i in "x"|ljust:claim.number_of_seats_claimed %}
-                                        <span>{{ claim.member.get_full_name|default:claim.member }}</span>{% if not forloop.last %},{% endif %}
-                                    {% endfor %}
-                                    {% if not forloop.last %},{% endif %}
-                                {% endfor %}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center">No trip entries found for this log.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="mt-5">
-            <a href="{% url 'mileage_logs_list' %}" class="btn btn-secondary">Back to List</a>
+        <div class="card-body">
+            <p><strong>Vehicle:</strong> {{ monthly_log.vehicle }}</p>
+            <p><strong>Year/Month:</strong> {{ monthly_log.year }}/{{ monthly_log.month }}</p>
+            <p><strong>Start Odometer:</strong> {{ monthly_log.start_odometer_reading }}</p>
+            <p><strong>End Odometer:</strong> {{ monthly_log.end_odometer_reading }}</p>
+            <p><strong>Total Distance Logged:</strong> {{ monthly_log.total_distance_logged }}</p>
+            <p><strong>Last Updated:</strong> {{ monthly_log.updated_at }}</p>
         </div>
     </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Trip Entries</h3>
+        <a href="{% url 'update_mileage_log_trips' pk=monthly_log.pk %}" class="btn btn-warning">Edit Trip Entries</a>
+    </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Start Mileage</th>
+                            <th>End Mileage</th>
+                            <th>Distance Traveled</th>
+                            <th>Destination</th>
+                            <th>Riders</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in monthly_log.log_entries.all %}
+                        <tr>
+                            <td>{{ entry.entry_date }}</td>
+                            <td>{{ entry.start_mileage }}</td>
+                            <td>{{ entry.end_mileage }}</td>
+                            <td>{{ entry.distance_traveled }}</td>
+                            <td>{{ entry.destination|default:"-" }}</td>
+                            <td>
+                                {% if entry.mileageclaim_set.all %}
+                                    {% for claim in entry.mileageclaim_set.all %}
+                                        {% for i in "x"|ljust:claim.number_of_seats_claimed %}
+                                            <span>{{ claim.member.get_full_name|default:claim.member }}</span>{% if not forloop.last %},{% endif %}
+                                        {% endfor %}
+                                        {% if not forloop.last %},{% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No trip entries found for this log.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-5">
+                <a href="{% url 'mileage_logs_list' %}" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+</div>
     
 {% endblock content%}

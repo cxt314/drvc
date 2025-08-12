@@ -72,6 +72,63 @@ def delete_mileage_log_view(request, pk):
     monthly_log.delete()
     return redirect('mileage_logs_list')
 
+def update_mileage_log_trips_view(request, pk):
+    """
+    View to edit MonthlyMileageLogEntries for the specified MonthlyMileageLog
+    """
+
+    return redirect('mileage_logs_list')
+
+def update_mileage_log_trips_view(request, pk):
+    """
+    View to update a MonthlyMileageLog's entries.
+    """
+    monthly_log = get_object_or_404(MonthlyMileageLog, pk=pk)
+
+    if request.method == 'POST':
+        formset = MileageLogEntryFormSet(request.POST, request.FILES, instance=monthly_log)
+        
+        # We need to process the nested formsets as well.
+        # This is a stub
+        claim_formsets = []
+
+        if formset.is_valid():
+            # Save parent forms first
+            instances = formset.save(commit=False)
+            
+            # Loop through all forms in the formset
+            for form in formset.ordered_forms:
+                if form.instance.pk:
+                    # If it's an existing instance, process its claim formset.
+                    claim_formset = MileageClaimFormSet(request.POST, request.FILES, instance=form.instance, prefix=f'mileageclaim_{form.instance.pk}')
+                    if claim_formset.is_valid():
+                        claim_formset.save()
+                    claim_formsets.append(claim_formset)
+            
+            # Save parent instances
+            formset.save()
+            return redirect('detail_mileage_log', pk=pk) # Redirect to detail page on success
+    
+    else: # GET request
+        formset = MileageLogEntryFormSet(instance=monthly_log)
+        
+        # Auto-populate the start_mileage for the new form
+        # This is the server-side logic you requested.
+        last_entry = monthly_log.log_entries.order_by('-entry_date', '-start_mileage').first()
+        if last_entry and formset.forms:
+            # Find the empty form in the formset.
+            # The last form is usually the empty one provided by `extra=1`.
+            empty_form = formset.forms[-1]
+            if not empty_form.instance.pk:
+                empty_form.initial['start_mileage'] = last_entry.end_mileage
+        
+    context = {
+        'formset': formset,
+        'monthly_log': monthly_log,
+    }
+    
+    return render(request, 'mileage_logs/mileage_log_entries_edit.html', context)
+
 # def create_mileage_log_view(request):
 #     """
 #     View to create a new MonthlyMileageLog and its nested inlines.

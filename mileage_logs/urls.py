@@ -12,4 +12,6 @@ urlpatterns = [
     path('<int:pk>/update/', views.update_mileage_log_view, name='update_mileage_log'),
     # delete a mileage log
     path('<int:pk>/delete/', views.delete_mileage_log_view, name='delete_mileage_log'),
+    # update trip entries for a mileage log
+    path('<int:pk>/update_trip_entries/', views.update_mileage_log_trips_view, name='update_mileage_log_trips'),
 ]
