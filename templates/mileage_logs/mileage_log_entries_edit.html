@@ -31,7 +31,7 @@
                             {% if form.instance.pk %}
                                 <!-- Nested formset for claims -->
                                 <h6 class="mt-4">Member Claims</h6>
-                                {% with claim_formset=form.instance.get_claim_formset %}
+                                {% with claim_formset=form.instance.get_mileageclaim_formset %}
                                     {{ claim_formset.management_form }}
                                     {% for claim_form in claim_formset %}
                                         <div class="claim-formset border p-3 mb-2 rounded">
@@ -48,7 +48,7 @@
             </div>
 
             <!-- This is the hidden empty form template that the JavaScript will clone -->
-            <div class="hidden-form empty-form">
+            <div class="hidden-form empty-form d-none">
                 <div class="card mb-3 trip-entry-formset">
                     <div class="card-body">
                         {% crispy formset.empty_form %}
